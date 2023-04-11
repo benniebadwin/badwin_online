@@ -1,0 +1,500 @@
+{% extends 'base.html' %}
+{% load static %}
+{% static "images" as baseUrl %}
+{% block title %}badwin online shop{% endblock title %}
+
+{% block main-content %}
+       <!-- Start offCanvas minicart -->
+       <div class="offCanvas__minicart">
+        <div class="minicart__header ">
+            <div class="minicart__header--top d-flex justify-content-between align-items-center">
+                <h2 class="minicart__title h3"> Shopping Cart</h2>
+                <button class="minicart__close--btn" aria-label="minicart close button" data-offcanvas>
+                    <svg class="minicart__close--icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                        <path fill="currentColor" stroke="currentColor" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="32" d="M368 368L144 144M368 144L144 368" />
+                    </svg>
+                </button>
+            </div>
+            <p class="minicart__header--desc">Products are limited</p>
+        </div>
+        {% if not cart_items %}
+        <h2 class="text-center">Your Shopping Cart is Empty</h2>
+        <br />
+        <div class="text-center">
+            <a href="{% url 'shop' %}" class="btn btn-primary">Continue Shopping</a>
+        </div>
+        {% else %}
+        <div class="minicart__product">
+            {% for cart_item in cart_items %}
+            <div class="minicart__product--items d-flex">
+                <div class="minicart__thumb">
+                    <a href="{{ cart_item.product.get_url }}"><img src="{{cart_item.product.image1.url}}" alt="prduct-img"></a>
+                </div>
+                <div class="minicart__text">
+                    <h3 class="minicart__subtitle h4"><a href="{{ cart_item.product.get_url }}">{{cart_item.product.name}}</a></h3>
+                    {% if cart_item.variations.all %} 
+                    {% for item in cart_item.variations.all %}
+                    <span class="color__variant"><b>{{ item.variation_category }} : </b> {{ item.variation_value }}</span>
+                    {% endfor %} 
+                    {% endif %}
+                    <div class="minicart__price">
+                        <span class="current__price">Ksh {{cart_item.product.new_price}} -</span>
+                        <span class="old__price">Ksh {{cart_item.product.new_price}}</span>
+                    </div>
+                  
+                    <div class="minicart__text--footer d-flex align-items-center">
+                        <div class="quantity__box minicart__quantity">
+                            <a type="button" href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" class="quantity__value decrease" aria-label="quantity value"
+                                value="Decrease Value">-</a>
+                            <label>
+                                <input type="number" class="quantity__number" value="{{ cart_item.quantity }}" data-counter />
+                            </label>
+                            <form action="{% url 'add_cart' cart_item.product.id %}" method="POST">
+                                {% csrf_token %} 
+                                {% for item in cart_item.variations.all %}
+                                <input type="hidden" name="{{ item.variation_category |lower }}" value="{{ item.variation_value | capfirst }}">
+                                {% endfor %}
+                                <button type="submit" class="quantity__value" aria-label="quantity value" value="Increase Value">+</button>
+                            </form>
+                        </div>
+                        <a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id%}" class="minicart__product--remove">Remove</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% endif %}
+        <div class="minicart__conditions text-center">
+            <input class="minicart__conditions--input" id="accept" type="checkbox">
+            <label class="minicart__conditions--label" for="accept">I agree with the <a
+                    class="minicart__conditions--link" href="{% url 'privacypolicy' %}">Privacy and Policy</a></label>
+        </div>
+        <div class="minicart__button d-flex justify-content-center">
+            <a class="primary__btn minicart__button--link" href="{% url 'cart' %}">View cart</a>
+            <a class="primary__btn minicart__button--link" href="{% url 'checkout' %}">Checkout</a>
+        </div>
+    </div>
+    <!-- End offCanvas minicart -->
+
+        <!-- Start serch box area -->
+        <div class="predictive__search--box ">
+            <div class="predictive__search--box__inner">
+                <h2 class="predictive__search--title">Search Products</h2>
+                <form class="predictive__search--form" action="{% url 'search' %}" method="GET">
+                    <label>
+                        <input class="predictive__search--input" placeholder="Search Here" type="text" name="keyword">
+                    </label>
+                    <button class="predictive__search--button" aria-label="search button" type="submit"><svg
+                            class="header__search--button__svg" xmlns="http://www.w3.org/2000/svg" width="30.51"
+                            height="25.443" viewBox="0 0 512 512">
+                            <path d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z" fill="none"
+                                stroke="currentColor" stroke-miterlimit="10" stroke-width="32" />
+                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10"
+                                stroke-width="32" d="M338.29 338.29L448 448" />
+                        </svg> </button>
+                </form>
+            </div>
+            <button class="predictive__search--close__btn" aria-label="search close button" data-offcanvas>
+                <svg class="predictive__search--close__icon" xmlns="http://www.w3.org/2000/svg" width="40.51"
+                    height="30.443" viewBox="0 0 512 512">
+                    <path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="32" d="M368 368L144 144M368 144L144 368" />
+                </svg>
+            </button>
+        </div>
+        <!-- End serch box area -->
+    </header>
+    <!-- End header area -->
+
+    <main class="main__content_wrapper">
+        
+        <!-- Start breadcrumb section -->
+        <!-- <section class="breadcrumb__section" style="background-color: coral; padding-top: 5%;padding-bottom: 5%;">
+            <div class="container">
+                <div class="row row-cols-1">
+                    <div class="col">
+                        <div class="breadcrumb__content text-center" >
+                            <h1 class="breadcrumb__content--title text-white mb-25">Product Details</h1>
+                            <ul class="breadcrumb__content--menu d-flex justify-content-center">
+                                <li class="breadcrumb__content--menu__items"><a class="text-white" href="{% url 'index' %}">Home</a></li>
+                                <li class="breadcrumb__content--menu__items"><span class="text-white">Product Details</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section> -->
+        <!-- End breadcrumb section -->
+
+        <!-- Start product details section -->
+        <section class="product__details--section section--padding">
+            <div class="container">
+                <div class="row row-cols-lg-2 row-cols-md-2">
+                    
+                    <div class="col">
+                        <div class="product__details--media">
+                            <div class="product__media--preview  swiper">
+                                <div class="swiper-wrapper">
+                                    <div class="swiper-slide">
+                                        <div class="product__media--preview__items">
+                                            <a class="product__media--preview__items--link glightbox" data-gallery="product-media-preview" href="{{ single_product.image1.url }}"><img class="product__media--preview__items--img" src="{{ single_product.image1.url }}" alt="product-media-img"></a>
+                                            <div class="product__media--view__icon">
+                                                <a class="product__media--view__icon--link glightbox" href="{{ single_product.image1.url }}" data-gallery="product-media-preview">
+                                                    <svg class="product__media--view__icon--svg" xmlns="http://www.w3.org/2000/svg" width="22.51" height="22.443" viewBox="0 0 512 512"><path d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M338.29 338.29L448 448"></path></svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="swiper-slide">
+                                        <div class="product__media--preview__items">
+                                            <a class="product__media--preview__items--link glightbox" data-gallery="product-media-preview" href="{{ single_product.image2.url }}"><img class="product__media--preview__items--img" src="{{ single_product.image2.url }}" alt="product-media-img"></a>
+                                            <div class="product__media--view__icon">
+                                                <a class="product__media--view__icon--link glightbox" href="{{ single_product.image2.url }}" data-gallery="product-media-preview">
+                                                    <svg class="product__media--view__icon--svg" xmlns="http://www.w3.org/2000/svg" width="22.51" height="22.443" viewBox="0 0 512 512"><path d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M338.29 338.29L448 448"></path></svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="swiper-slide">
+                                        <div class="product__media--preview__items">
+                                            <a class="product__media--preview__items--link glightbox" data-gallery="product-media-preview" href="{{ single_product.image3.url }}"><img class="product__media--preview__items--img" src="{{ single_product.image3.url }}" alt="product-media-img"></a>
+                                            <div class="product__media--view__icon">
+                                                <a class="product__media--view__icon--link glightbox" href="{{ single_product.image3.url }}" data-gallery="product-media-preview">
+                                                    <svg class="product__media--view__icon--svg" xmlns="http://www.w3.org/2000/svg" width="22.51" height="22.443" viewBox="0 0 512 512"><path d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M338.29 338.29L448 448"></path></svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="swiper-slide">
+                                        <div class="product__media--preview__items">
+                                            <a class="product__media--preview__items--link glightbox" data-gallery="product-media-preview" href="{{ single_product.image4.url }} "><img class="product__media--preview__items--img" src="{{ single_product.image4.url }}" alt="product-media-img"></a>
+                                            <div class="product__media--view__icon">
+                                                <a class="product__media--view__icon--link glightbox" href="{{ single_product.image4.url }}" data-gallery="product-media-preview">
+                                                    <svg class="product__media--view__icon--svg" xmlns="http://www.w3.org/2000/svg" width="22.51" height="22.443" viewBox="0 0 512 512"><path d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M338.29 338.29L448 448"></path></svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="swiper-slide">
+                                        <div class="product__media--preview__items">
+                                            <a class="product__media--preview__items--link glightbox" data-gallery="product-media-preview" href="{{ single_product.image5.url }}"><img class="product__media--preview__items--img" src="{{ single_product.image5.url }}" alt="product-media-img"></a>
+                                            <div class="product__media--view__icon">
+                                                <a class="product__media--view__icon--link glightbox" href="{{ single_product.image5.url }}" data-gallery="product-media-preview">
+                                                    <svg class="product__media--view__icon--svg" xmlns="http://www.w3.org/2000/svg" width="22.51" height="22.443" viewBox="0 0 512 512"><path d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M338.29 338.29L448 448"></path></svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="swiper-slide">
+                                        <div class="product__media--preview__items">
+                                            <a class="product__media--preview__items--link glightbox" data-gallery="product-media-preview" href="{{ single_product.image6.url }}"><img class="product__media--preview__items--img" src="{{ single_product.image6.url }}" alt="product-media-img"></a>
+                                            <div class="product__media--view__icon">
+                                                <a class="product__media--view__icon--link glightbox" href="{{ single_product.image6.url }}" data-gallery="product-media-preview">
+                                                    <svg class="product__media--view__icon--svg" xmlns="http://www.w3.org/2000/svg" width="22.51" height="22.443" viewBox="0 0 512 512"><path d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M338.29 338.29L448 448"></path></svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                         <div class="product__media--nav swiper">
+                                <div class="swiper-wrapper">
+                                   
+                                    <div class="swiper-slide">
+                                        <div class="product__media--nav__items">
+                                            <img class="product__media--nav__items--img" src="{{ single_product.image1.url }}" alt="product-nav-img">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="swiper-slide">
+                                        <div class="product__media--nav__items">
+                                            <img class="product__media--nav__items--img" src="{{ single_product.image2.url }}" alt="product-nav-img">
+                                        </div>
+                                    </div>
+                                    
+                                    {% if single_product.image3.url %} 
+                                    <div class="swiper-slide">
+                                        <div class="product__media--nav__items">
+                                            <img class="product__media--nav__items--img" src="{{ single_product.image3.url }}" alt="product-nav-img">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if single_product.image4.url %} 
+                                    <div class="swiper-slide">
+                                        <div class="product__media--nav__items">
+                                            <img class="product__media--nav__items--img" src="{{ single_product.image4.url }}" alt="product-nav-img">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if single_product.image5.url %} 
+                                    <div class="swiper-slide">
+                                        <div class="product__media--nav__items">
+                                            <img class="product__media--nav__items--img" src="{{ single_product.image5.url }}" alt="product-nav-img">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if single_product.image6.url %} 
+                                    <div class="swiper-slide">
+                                        <div class="product__media--nav__items">
+                                            <img class="product__media--nav__items--img" src="{{ single_product.image6.url }}" alt="product-nav-img">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="swiper__nav--btn swiper-button-next"></div>
+                                <div class="swiper__nav--btn swiper-button-prev"></div>
+                            </div> 
+                        </div>
+                    </div>   
+                    <div class="col">
+                        <div class="product__details--info">
+                            <form action="#">
+                                <h2 class="product__details--info__title mb-15">{{ single_product.name }}</h2>
+                                <div class="product__details--info__price mb-10">
+                                    <span class="current__price">Ksh {{ single_product.new_price }}</span>
+                                    <span class="price__divided"></span>
+                                    <span class="old__price">Ksh {{ single_product.old_price }}</span>
+                                </div>
+                                <div class="product__details--info__rating d-flex align-items-center mb-15">
+                                    <ul class="rating d-flex justify-content-center">
+                                        <li class="rating__list">
+                                            <span class="rating__list--icon">
+                                                <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                </svg>
+                                            </span>
+                                        </li>
+                                        <li class="rating__list">
+                                            <span class="rating__list--icon">
+                                                <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                </svg>
+                                            </span>
+                                        </li>
+                                        <li class="rating__list">
+                                            <span class="rating__list--icon">
+                                                <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                </svg>
+                                            </span>
+                                        </li>
+                                        <li class="rating__list">
+                                            <span class="rating__list--icon">
+                                                <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                </svg>
+                                            </span>
+                                        </li>
+                                        <li class="rating__list">
+                                            <span class="rating__list--icon">
+                                                <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                </svg>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                    <span class="product__items--rating__count--number">({{reviews.count}}) Verified Reviews</span>
+                                </div>
+                                <p class="product__details--info__desc mb-15">{{ single_product.description }}</p>
+                                <div class="product__variant">
+                                    <div class="product__variant--list quantity d-flex align-items-center mb-20">
+                                        {% if single_product.stock <= 0 %}
+                                        <h5 class="text-danger">Out of Stock</h5>
+                                        {% else %}
+                                        {% if request.user.id.is_authenticated and in_cart %}
+                                        <a href="#" class="btn  btn-success"> <span class="text quickview__cart--btn btn primary__btn">Added to Cart</span> <i
+                                          class="fa fa-check"></i> </a>
+                                        <a href="{% url  'cart' %}" class="btn  btn-success"> <span class="text quickview__cart--btn btn primary__btn">View Cart  <svg class="product__items--action__btn--svg" xmlns="http://www.w3.org/2000/svg"  width="25.51" height="23.443" viewBox="0 0 512 512"><path d="M255.66 112c-77.94 0-157.89 45.11-220.83 135.33a16 16 0 00-.27 17.77C82.92 340.8 161.8 400 255.66 400c92.84 0 173.34-59.38 221.79-135.25a16.14 16.14 0 000-17.47C428.89 172.28 347.8 112 255.66 112z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><circle cx="256" cy="256" r="80" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/></svg></span> <i
+                                            class="fa fa-check"></i> </a>  
+                                        {% else %}
+                                        <a href="{% url 'add_cart' single_product.id %}"   class="btn quickview__cart--btn btn primary__btn"> <span class="text">Add to Cart</span> <i
+                                            class="fa fa-shopping-cart"></i> </a>
+                                            <a href="{% url 'wishlist_product_toggle' single_product.id %}"   class="btn quickview__cart--btn btn primary__btn">
+                                               {% if in_wishlist %}
+                                                 Remove from wishlist
+                                               {% else %}
+                                                 Add to wishlist
+                                               {% endif %}
+                                             </a>
+                                    </div>
+                                    
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- End product details section -->
+
+        <!-- Start product details tab section -->
+        <section class="product__details--tab__section section--padding">
+            <div class="container">
+                <div class="row row-cols-1">
+                    <div class="col">
+                        <ul class="product__details--tab d-flex mb-30">
+                            <li class="product__details--tab__list active" data-toggle="tab" data-target="#reviews">Product Reviews</li>
+                            
+                        </ul>
+                        <div class="product__details--tab__inner border-radius-10">
+                            <div class="tab_content">
+                                 
+                                <div id="reviews" class="tab_pane active show">
+                                    <div class="product__reviews">
+                                        <div class="product__reviews--header">
+                                            <h2 class="product__reviews--header__title h3 mb-20">Customer Reviews</h2>
+                                            <div class="reviews__ratting d-flex align-items-center">
+                                                <span class="reviews__summary--caption">Based on {{reviews.count}} reviews</span>
+                                            </div>
+                                        </div>
+                                        <div class="reviews__comment--area">
+                                            <div class="reviews__comment--list d-flex">
+                                            {% for review in reviews %}
+                                                <div class="reviews__comment--content">
+                                                    <div class="reviews__comment--top d-flex justify-content-between">
+                                                        <div class="reviews__comment--top__left">
+                                                            <h3 class="reviews__comment--content__title h4">{{review.user}}</h3>
+                                                            <ul class="rating reviews__comment--rating d-flex">
+                                                                {{review.rating}} 
+                                                                <li class="rating__list" style="margin-left: 10%;">
+                                                                    <span class="rating__list--icon">
+                                                                        <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                                        <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                                        </svg>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="rating__list">
+                                                                    <span class="rating__list--icon">
+                                                                        <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                                        <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                                        </svg>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="rating__list">
+                                                                    <span class="rating__list--icon">
+                                                                        <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                                        <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                                        </svg>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="rating__list">
+                                                                    <span class="rating__list--icon">
+                                                                        <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                                        <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                                        </svg>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="rating__list">
+                                                                    <span class="rating__list--icon">
+                                                                        <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                                        <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                                        </svg>
+                                                                    </span>
+                                                                </li>
+                                                                <li class="rating__list">
+                                                                    <span class="rating__list--icon">
+                                                                        <svg class="rating__list--icon__svg" xmlns="http://www.w3.org/2000/svg" width="14.105" height="14.732" viewBox="0 0 10.105 9.732">
+                                                                        <path data-name="star - Copy" d="M9.837,3.5,6.73,3.039,5.338.179a.335.335,0,0,0-.571,0L3.375,3.039.268,3.5a.3.3,0,0,0-.178.514L2.347,6.242,1.813,9.4a.314.314,0,0,0,.464.316L5.052,8.232,7.827,9.712A.314.314,0,0,0,8.292,9.4L7.758,6.242l2.257-2.231A.3.3,0,0,0,9.837,3.5Z" transform="translate(0 -0.018)" fill="currentColor"></path>
+                                                                        </svg>
+                                                                    </span>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <span class="reviews__comment--content__date">{{review.created_at}}</span>
+                                                    </div>
+                                                    <p class="reviews__comment--content__desc">{{review.review}}</p>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        
+                                        <div id="writereview" class="reviews__comment--reply__area">
+                                            <form action="{% url 'submit_review' single_product.id %}" method="POST">
+                                                 {% csrf_token%}
+                                                <h3 class="reviews__comment--reply__title mb-15">Add a review </h3>
+                                                <label>How do you rate this product?</label>
+                                                    <br>
+                                                    <div class="rate">
+                                                        <input type="radio" name="rating" id="rating10" value="5" required> <label for="rating10" title="5"> 5</label>
+                                                        <input type="radio" name="rating" id="rating9" value="4.5" required> <label for="rating9" title="4.5" class="half">4.5</label>
+                                                        <input type="radio" name="rating" id="rating8" value="4" required> <label for="rating8" title="4">4</label>
+                                                        <input type="radio" name="rating" id="rating7" value="3.5" required> <label for="rating7" title="3.5" class="half">3.5</label>
+                                                        <input type="radio" name="rating" id="rating6" value="3" required> <label for="rating6" title="3">3</label>
+                                                        <input type="radio" name="rating" id="rating5" value="2.5" required> <label for="rating5" title="2.5" class="half">2.5</label>
+                                                        <input type="radio" name="rating" id="rating4" value="2" required> <label for="rating4" title="2">2</label>
+                                                        <input type="radio" name="rating" id="rating3" value="1.5" required> <label for="rating3" title="1.5" class="half">1.5</label>
+                                                        <input type="radio" name="rating" id="rating2" value="1" required> <label for="rating2" title="1">1</label>
+                                                        <input type="radio" name="rating" id="rating1" value="0.5" required> <label for="rating1" title="0.5" class="half">0.5</label>
+                                                    </div>
+                                                    <br>
+                                                <div class="row">
+                                                    <div class="col-12 mb-10">
+                                                        Review:
+                                                        <textarea class="reviews__comment--reply__textarea" name="review" placeholder="Your Review...." ></textarea>
+                                                    </div> 
+                                                </div>
+                                                {% if user.is_authenticated %}
+                                                <input class="primary__btn" value="Submit Review" type="submit">
+                                                {% else %}
+                                                <p>You must be logged in to post a review. <span><a class="btn btn-outline-primary primary__btn minicart__button--link" href="{% url 'login' %}">Login now</a></span></p>
+                                                {% endif %}
+
+                                                {% include 'alerts.html' %}
+                                            </form>   
+                                        </div> 
+                                    </div>    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- End product details tab section -->
+        
+       
+       <!-- Start product section -->
+       <section class="product__section product__section--style3 section--padding">
+        <div class="container product3__section--container">
+            <div class="section__heading text-center mb-50">
+                <h2 class="section__heading--maintitle">You may also like</h2>
+            </div>
+            <div class="product__section--inner product__swiper--column4__activation swiper" >
+                <div class="swiper-wrapper">
+                    {% for product in products %}
+                    <div class="swiper-slide" style="box-shadow: 5px 5px 5px 5px #e2dede;padding:2%;" >
+                        <div class="product__items ">
+                            <div class="product__items--thumbnail">
+                                <a class="product__items--link" href="{{ product.get_url }}">
+                                    <img class="product__items--img product__primary--img" src="{{product.image1.url}}" alt="product-img">
+                                    <img class="product__items--img product__secondary--img" src="{{product.image2.url}}" alt="product-img">
+                                </a>
+                                <div class="product__badge">
+                                    <span class="product__badge--items sale">Sale</span>
+                                </div>
+                            </div>
+                            <div class="product__items--content">
+                                <span class="product__items--content__subtitle">{{product.category}}</span>
+                                <h3 class="product__items--content__title h4"><a href="{{ product.get_url }}">{{product.name}}</a></h3>
+                                <div class="product__items--price">
+                                    <span class="current__price">Ksh {{product.new_price}}</span>
+                                    <span class="price__divided"></span>
+                                    <span class="old__price">Ksh {{product.old_price}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="swiper__nav--btn swiper-button-next"></div>
+                <div class="swiper__nav--btn swiper-button-prev"></div>
+            </div>
+        </div>
+    </section>
+    <!-- End product section -->
+    
+    {% endblock main-content %}

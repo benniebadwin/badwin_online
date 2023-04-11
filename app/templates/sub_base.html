@@ -1,0 +1,14 @@
+
+{% load static %}
+{% block stylesheet %}
+{% endblock stylesheet %}
+{% block main-content %}
+  <div class="container">
+    <div class="login d-flex align-items-center">
+      <div class="col-9 mx-auto">
+        {% block content %}
+        {% endblock content %}
+      </div>
+    </div>
+  </div>
+{% endblock main-content %}

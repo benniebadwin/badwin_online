@@ -1,0 +1,13 @@
+{% extends 'base1.html' %}
+{% load static %}
+{% static "images" as baseUrl %}
+{% block title %}badwin online shop{% endblock title %}
+
+{% block main-content %}
+
+<h1>404 Error</h1>
+Hi, {{ user.username }}
+<h3><p>We`re Sorry, the page you are requesting cannot be found</p></h3>
+<a href="{% url 'index' %}"><p style="font-style: italic;font-size:15px;font-weight:300;color:rgb(66, 14, 211)">Click me to Contiue shopping</p></a></h6>
+
+{% endblock main-content %}
